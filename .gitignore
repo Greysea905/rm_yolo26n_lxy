@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 数据与输出（大文件，不上传 git）
+data/
+datasets/
+runs/
+
+# 模型权重
+*.pt
+
+# 环境
+.venv/
+venv/
+
+# 系统
+.DS_Store
