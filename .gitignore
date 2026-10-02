@@ -8,8 +8,7 @@ data/
 datasets/
 runs/
 
-# 模型权重
-*.pt
+# 模型权重提交到 github
 
 # 环境
 .venv/

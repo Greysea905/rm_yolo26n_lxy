@@ -1,21 +1,22 @@
-# ============================================================
-# 训练超参 —— src/train.py 会读取本文件
-# 每改动一次，记录到训练表格（对应 docs/ 里的实验记录）
-# ============================================================
+model: weights/yolo26n.pt  
+data: config/data.yaml         # 数据集配置（相对项目根）
 
-model: weights/yolo26n.pt  # baseline 预训练权重（放在 weights/ 下）
-data: config/data.yaml     # 数据集配置（相对项目根）
-imgsz: 640                 # 起步用 640 作 baseline；小目标建议上调到 1280
-epochs: 50
-batch: 8
-device: 0                  # AutoDL GPU 编号；CPU 用 "cpu"
+# 基本项
+imgsz: 1280                    # 小目标多，用 1280；快速冒烟测试可临时 --imgsz 640
+epochs: 80
+batch: 16                      # RTX 4090D 24GB
+device: 0                      # GPU 编号
 workers: 8
-name: rm_car               # 训练输出目录名（runs/rm_car/...）
+name: rm_car_full_v2           # 训练日志输出到 runs/rm_car_full_v2/ （将可选标注并入训练集后的第二次训练）
 
-# ---- 可调项（写进训练表格对比 mAP）----
-# lr0: 0.01        # 初始学习率
-# cos_lr: true     # 余弦退火
-# mosaic: 1.0      # 小目标可试 0（关闭 mosaic）
-# hsv_h: 0.015     # 数据增强
-# patience: 50     # 早停
-# close_mosaic: 10 # 最后 N 轮关闭 mosaic
+# 学习率 / 优化器 
+optimizer: auto                # 自动选优化器：实际用 AdamW（lr≈0.002），会忽略 lr0
+lrf: 0.01                      # 最终学习率因子（余弦退火终点 = 0.002 × lrf ≈ 0.00002）
+cos_lr: true                   # 余弦退火
+warmup_epochs: 3               # 前几轮线性 warmup
+
+# 训练策略 
+patience: 15                   # 早停：15 轮验证无提升则停
+save_period: 5                 # 每 5 轮存一个检查点（另存 best.pt / last.pt）
+close_mosaic: 10               # 最后 10 轮关闭 mosaic，收尾回到真实图分布
+  

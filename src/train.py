@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-"""训练入口：读 config/train.yaml 里的超参，调用 ultralytics 训练。
+"""训练入口：读 config/train.yaml 里的超参，调用 ultralytics 训练"""
 
-用法：
-    python train.py                          # 用 yaml 里的超参
-    python train.py --epochs 100 --imgsz 1280   # 命令行覆盖最常用的几项
-"""
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 
-from common import PROJECT_ROOT, DATASETS_DIR, CONFIG_DIR, RUNS_DIR, load_yaml, load_model
+from common import PROJECT_ROOT, DATASETS_DIR, CONFIG_DIR, RUNS_DIR, load_yaml, dump_yaml, load_model
 
 
 def main():
@@ -28,22 +24,34 @@ def main():
         if v is not None:
             cfg[key] = v
 
-    # data.yaml 里的 path 绝对化，避免相对路径歧义
     dcfg = load_yaml(PROJECT_ROOT / cfg["data"])
-    dcfg["path"] = str(DATASETS_DIR)
+    data_tmp = RUNS_DIR / "_data.yaml"
+    dump_yaml(
+        {"path": str(DATASETS_DIR), "train": dcfg["train"], "val": dcfg["val"], "names": dcfg["names"]},
+        data_tmp,
+    )
 
     model = load_model(PROJECT_ROOT / cfg["model"])
-    model.train(
-        data=dcfg,
-        epochs=cfg["epochs"],
-        imgsz=cfg["imgsz"],
-        batch=cfg["batch"],
-        device=cfg["device"],
-        workers=cfg.get("workers", 8),
-        project=str(RUNS_DIR),
-        name=cfg.get("name", "rm_car"),
-        exist_ok=True,
-    )
+
+    # 基础参数
+    train_args = {
+        "data": str(data_tmp),
+        "epochs": cfg["epochs"],
+        "imgsz": cfg["imgsz"],
+        "batch": cfg["batch"],
+        "device": cfg["device"],
+        "workers": cfg.get("workers", 8),
+        "project": str(RUNS_DIR),
+        "name": cfg.get("name", "rm_car"),
+        "exist_ok": False,  # 目录已存在时自动加序号（rm_car2/rm_car3），避免覆盖旧结果
+    }
+    # 可选超参
+    for key in ("lr0", "lrf", "cos_lr", "warmup_epochs", "patience", "save_period", "close_mosaic",
+                "mosaic", "optimizer", "weight_decay", "hsv_h", "hsv_s", "hsv_v", "fliplr"):
+        if key in cfg:
+            train_args[key] = cfg[key]
+
+    model.train(**train_args)
 
 
 if __name__ == "__main__":

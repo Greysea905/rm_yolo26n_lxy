@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""在验证集上评估模型，输出 mAP50 / mAP50-95。
-
-用法：
-    python val.py --weights runs/rm_car/weights/best.pt --imgsz 1280
-"""
+"""在验证集上评估模型，输出 mAP50 / mAP50-95"""
 from __future__ import annotations
 
 import argparse

@@ -117,27 +117,28 @@ def main():
         full_boxes.extend((b[2], b[3], b[2] * b[3], b[2] / max(b[3], 1e-6)) for b in boxes)
     make_stats(full_boxes, full_per_img, out)
 
-    # 3) HTML 画廊
+    # 3) HTML 画廊（单列大图，滚轮向下逐张浏览）
     rows = []
     for ip, _ in sample:
         stem = ip.stem
-        rows.append(
-            f'<div class="card"><img src="overlay/{stem}.jpg" loading="lazy">'
-            f'<div class="cap">{stem}</div></div>'
-        )
+        rows.append(f'<figure><img src="overlay/{stem}.jpg"><figcaption>{stem}</figcaption></figure>')
     html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>标注可视化</title>
 <style>
-body{{font-family:sans-serif;background:#111;color:#eee;margin:16px}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}}
-.card img{{width:100%;display:block;border-radius:6px}}
-.cap{{padding:4px 6px;font-size:13px;color:#aaa}}
+body{{font-family:sans-serif;background:#111;color:#eee;margin:0}}
+#wrap{{max-width:1100px;margin:0 auto;padding:16px}}
+h2{{text-align:center;color:#ccc;font-size:16px}}
+figure{{margin:0 0 30px 0}}
+figure img{{width:100%;display:block;border-radius:6px}}
+figcaption{{padding:6px 4px;font-size:15px;color:#8ac}}
 </style></head><body>
-<h2>标注可视化（共 {len(sample)} 张）</h2>
-<div class="grid">{''.join(rows)}</div>
+<div id="wrap">
+<h2>标注可视化（共 {len(sample)} 张，滚轮向下逐张看）</h2>
+{''.join(rows)}
+</div>
 </body></html>"""
     (out / "gallery.html").write_text(html)
-    print(f"已生成画廊 -> {out / 'gallery.html'}（浏览器打开）")
+    print(f"已生成画廊 -> {out / 'gallery.html'}（把整个 data/visualized/ 下载到本地，浏览器打开）")
 
 
 if __name__ == "__main__":

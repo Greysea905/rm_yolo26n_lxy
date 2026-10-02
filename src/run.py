@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
-"""推理：对一批图片跑检测，打印 bbox list。
+"""推理：对一批图片跑检测，打印 bbox list"""
 
-用法：
-    python run.py --weights runs/rm_car/weights/best.pt --source datasets/images/test
-    python run.py --source datasets/images/test --save   # 顺便保存画框结果图
-"""
 from __future__ import annotations
 
 import argparse
